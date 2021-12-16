@@ -15,7 +15,15 @@ provider "azurerm" {
 
 //Create resource group
 resource "azurerm_resource_group" "RG" {
-	name = "rg-k8s-onetrust"
+	name = "rg-k8s-onetrust-core"
+	location = var.location
+	tags = {
+    ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
+  }
+}
+
+resource "azurerm_resource_group" "RG-NODES" {
+	name = "rg-k8s-onetrust-nodes"
 	location = var.location
 	tags = {
     ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
@@ -28,7 +36,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   name                = var.cluster_name
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
-  node_resource_group = azurerm_resource_group.RG.name
+  node_resource_group = azurerm_resource_group.RG-NODES.name
   dns_prefix          = var.dns_prefix
 
 default_node_pool {
@@ -63,7 +71,7 @@ resource "azurerm_subnet" "SUBNET" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.RG.name
   virtual_network_name = azurerm_virtual_network.VNET.name
-  address_prefixes     = ["10.10.10.0/23"]
+  address_prefixes     = ["10.10.10.0/26"]
 }
 
 //OneTrust Management VM
@@ -75,7 +83,6 @@ resource "azurerm_network_interface" "NIC" {
     name                          = "ipconfig1"
     subnet_id                     = azurerm_subnet.SUBNET.id
     private_ip_address_allocation = "static"
-    private_ip_address            = "Dynamic"
   }
 
 }
@@ -106,14 +113,14 @@ resource "azurerm_virtual_machine" "VM" {
   os_profile_linux_config {
     disable_password_authentication = false
   }
-  tags = {
-    environment = "staging"
+tags = {
+    ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
   }
 }
 
 resource "azurerm_virtual_machine_extension" "BOOTSTRAP" {
   name                 = "hostname"
-  virtual_machine_id   = azurerm_virtual_machine.example.id
+  virtual_machine_id   = azurerm_virtual_machine.VM.id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
