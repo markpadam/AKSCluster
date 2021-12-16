@@ -15,7 +15,7 @@ provider "azurerm" {
 
 //Create resource group
 resource "azurerm_resource_group" "RG" {
-	name = "rg-k8s-onetrust-core"
+	name = "rg-k8s-core"
 	location = var.location
 	tags = {
     ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
@@ -23,7 +23,7 @@ resource "azurerm_resource_group" "RG" {
 }
 
 resource "azurerm_resource_group" "RG-NODES" {
-	name = "rg-k8s-onetrust-nodes"
+	name = "rg-k8s-nodes"
 	location = var.location
 	tags = {
     ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
@@ -36,7 +36,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   name                = var.cluster_name
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
-  node_resource_group = azurerm_resource_group.RG-NODES.name
+  //node_resource_group = azurerm_resource_group.RG-NODES.name
   dns_prefix          = var.dns_prefix
 
 default_node_pool {
@@ -119,7 +119,7 @@ tags = {
 }
 
 resource "azurerm_virtual_machine_extension" "BOOTSTRAP" {
-  name                 = "hostname"
+  name                 = "cloudinit"
   virtual_machine_id   = azurerm_virtual_machine.VM.id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
