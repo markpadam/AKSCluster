@@ -82,7 +82,7 @@ resource "azurerm_network_interface" "NIC" {
   ip_configuration {
     name                          = "ipconfig1"
     subnet_id                     = azurerm_subnet.SUBNET.id
-    private_ip_address_allocation = "static"
+    private_ip_address_allocation = "Dynamic"
   }
 
 }
