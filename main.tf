@@ -71,7 +71,7 @@ resource "azurerm_subnet" "MGMT" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.RG.name
   virtual_network_name = azurerm_virtual_network.VNET.name
-  address_prefixes     = ["10.10.10.129/25"]
+  address_prefixes     = ["10.10.10.128/25"]
 }
 
 //OneTrust Management VM
@@ -81,7 +81,7 @@ resource "azurerm_network_interface" "NIC" {
   resource_group_name = azurerm_resource_group.RG.name
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = azurerm_subnet.SN-VM.id
+    subnet_id                     = azurerm_subnet.MGMT.id
     private_ip_address_allocation = "Dynamic"
   }
 }
