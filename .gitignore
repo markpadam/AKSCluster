@@ -382,3 +382,5 @@ override.tf.json
 # example: *tfplan*
 
 # Ignore CLI configuration files
+terraform.tfstate
+terraform.tfstate.backup

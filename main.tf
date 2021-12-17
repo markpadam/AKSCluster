@@ -43,6 +43,7 @@ default_node_pool {
     name       = "default"
     node_count = 1
     vm_size    = "Standard_D2_v2"
+    vnet_subnet_id = azurerm_subnet.SUBNET.id
   }
 
   identity {
@@ -66,13 +67,22 @@ tags = {
     ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
   }
 }
-//Subnet
+
+//Virtual machine Subnet
 resource "azurerm_subnet" "SUBNET" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.RG.name
   virtual_network_name = azurerm_virtual_network.VNET.name
-  address_prefixes     = ["10.10.10.0/26"]
+  address_prefixes     = ["10.10.10.0/24"]
 }
+
+# //Node Subnet
+# resource "azurerm_subnet" "NODESUBNET" {
+#   name                 = "internal"
+#   resource_group_name  = azurerm_resource_group.RG.name
+#   virtual_network_name = azurerm_virtual_network.VNET.name
+#   address_prefixes     = ["10.10.10.9/25"]
+# }
 
 //OneTrust Management VM
 resource "azurerm_network_interface" "NIC" {
@@ -84,7 +94,6 @@ resource "azurerm_network_interface" "NIC" {
     subnet_id                     = azurerm_subnet.SUBNET.id
     private_ip_address_allocation = "Dynamic"
   }
-
 }
 resource "azurerm_virtual_machine" "VM" {
   name                  = "vm-onetrustmgmt"
@@ -118,16 +127,16 @@ tags = {
   }
 }
 
-resource "azurerm_virtual_machine_extension" "BOOTSTRAP" {
-  name                 = "cloudinit"
-  virtual_machine_id   = azurerm_virtual_machine.VM.id
-  publisher            = "Microsoft.Azure.Extensions"
-  type                 = "CustomScript"
-  type_handler_version = "2.0"
+# resource "azurerm_virtual_machine_extension" "BOOTSTRAP" {
+#   name                 = "cloudinit"
+#   virtual_machine_id   = azurerm_virtual_machine.VM.id
+#   publisher            = "Microsoft.Azure.Extensions"
+#   type                 = "CustomScript"
+#   type_handler_version = "2.0"
 
-  settings = <<SETTINGS
-    {
-        "commandToExecute": "sudo apt update && sudo apt install docker -y && sudo apt install kubectl -y && sudo apt install azure-cli -y"
-    }
-SETTINGS
-}
+#   settings = <<SETTINGS
+#     {
+#         "commandToExecute": "sudo apt update && sudo apt install docker -y && sudo apt install kubectl -y && sudo apt install azure-cli -y"
+#     }
+# SETTINGS
+# }
