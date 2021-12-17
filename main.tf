@@ -22,21 +22,13 @@ resource "azurerm_resource_group" "RG" {
   }
 }
 
-resource "azurerm_resource_group" "RG-NODES" {
-	name = "rg-k8s-nodes"
-	location = var.location
-	tags = {
-    ownername = "MarkAdam" //Require for deployment into dev enviroment due to policy
-  }
-}
-
 //Create the AKS Cluster
 resource "azurerm_kubernetes_cluster" "k8s" {
 	
   name                = var.cluster_name
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
-  //node_resource_group = azurerm_resource_group.RG-NODES.name
+  node_resource_group = azurerm_resource_group.RG-NODES.name
   dns_prefix          = var.dns_prefix
 
 default_node_pool {
@@ -75,14 +67,6 @@ resource "azurerm_subnet" "SUBNET" {
   virtual_network_name = azurerm_virtual_network.VNET.name
   address_prefixes     = ["10.10.10.0/24"]
 }
-
-# //Node Subnet
-# resource "azurerm_subnet" "NODESUBNET" {
-#   name                 = "internal"
-#   resource_group_name  = azurerm_resource_group.RG.name
-#   virtual_network_name = azurerm_virtual_network.VNET.name
-#   address_prefixes     = ["10.10.10.9/25"]
-# }
 
 //OneTrust Management VM
 resource "azurerm_network_interface" "NIC" {
