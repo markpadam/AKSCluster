@@ -35,7 +35,7 @@ default_node_pool {
     name       = "default"
     node_count = 1
     vm_size    = "Standard_D2_v2"
-    vnet_subnet_id = azurerm_subnet.SUBNET.id
+    vnet_subnet_id = azurerm_subnet.SN-Nodes.id
   }
 
   identity {
@@ -47,7 +47,7 @@ tags = {
   }
 }
 
-//Create Virtual Network for VM
+//Create Virtual Network
 resource "azurerm_virtual_network" "VNET" {
   name                = "vnet-aks-onetrust"
   location            = azurerm_resource_group.RG.location
@@ -60,12 +60,18 @@ tags = {
   }
 }
 
-//Virtual machine Subnet
-resource "azurerm_subnet" "SUBNET" {
+//Virtual Network Subnets
+resource "azurerm_subnet" "SN-Nodes" {
+  name                 = "AKS"
+  resource_group_name  = azurerm_resource_group.RG.name
+  virtual_network_name = azurerm_virtual_network.VNET.name
+  address_prefixes     = ["10.10.10.0/25"]
+}
+resource "azurerm_subnet" "MGMT" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.RG.name
   virtual_network_name = azurerm_virtual_network.VNET.name
-  address_prefixes     = ["10.10.10.0/24"]
+  address_prefixes     = ["10.10.10.129/25"]
 }
 
 //OneTrust Management VM
@@ -75,7 +81,7 @@ resource "azurerm_network_interface" "NIC" {
   resource_group_name = azurerm_resource_group.RG.name
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = azurerm_subnet.SUBNET.id
+    subnet_id                     = azurerm_subnet.SN-VM.id
     private_ip_address_allocation = "Dynamic"
   }
 }
